@@ -4,7 +4,8 @@ from telegram.ext import ContextTypes, ConversationHandler
 
 from constants import S_NAME, S_PHONE, S_CITY, S_GRADE, S_SUBJECT, S_MODE, S_NOTES, MENU, ST_SEARCH_SUBJECT, ST_SEARCH_GRADE, ST_SEARCH_CITY, ST_PICK_TUTOR, ST_WRITE_REQUEST, CHOOSING_ROLE
 from keyboards import main_menu_keyboard, phone_keyboard, mode_keyboard_student
-from database import save_student, get_user, search_tutors, create_request
+from database import save_student, search_tutors, create_request
+from common import get_phone_from_db
 
 def _is_back_to_main_menu(msg: str) -> bool:
     return (msg or "").strip().lower() in ("🏠 back to main menu", "back to main menu", "main menu")
@@ -168,6 +169,7 @@ async def st_write_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -
     tutor_id = int(context.user_data["picked_tutor_id"])
     tutor_name = context.user_data["picked_tutor_name"]
     create_request(student_id, tutor_id, message)
+    phone = get_phone_from_db(update, "student")
     # Notify tutor
     try:
         await context.bot.send_message(
@@ -176,6 +178,7 @@ async def st_write_request(update: Update, context: ContextTypes.DEFAULT_TYPE) -
                 "📩 *New tutoring request!*\n"
                 f"From student ID: `{student_id}`\n\n"
                 f"Message:\n{message}\n\n"
+                f"Phone: `{phone}`\n\n"
                 "Reply to the student directly in Telegram (open their profile using the ID), "
                 "or build a /reply feature later."
             ),

@@ -51,3 +51,18 @@ async def show_profile(update: Update, context: ContextTypes.DEFAULT_TYPE, role:
                 f"- Test score: {row['test_score']}/{len(TUTOR_TEST)}"
             )
     await update.message.reply_text(msg, parse_mode="Markdown")
+    
+def get_phone_from_db(update, role: str) -> Optional[str]:
+    telegram_id = update.effective_user.id
+    with db() as conn:
+        if role == "student":
+            row = conn.execute("SELECT * FROM students WHERE telegram_id=?", (telegram_id,)).fetchone()
+            if row:
+                return row["phone"]
+        else:
+            row = conn.execute("SELECT * FROM tutors WHERE telegram_id=?", (telegram_id,)).fetchone()
+            if row:
+                return row["phone"]
+    return None
+
+
